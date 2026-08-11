@@ -61,3 +61,7 @@ def quantum_walk_basis(shots=1):
 def get_quantum_random_basis(shots=1):
     basis, _ = quantum_walk_basis(shots=shots)
     return basis
+
+def get_quantum_random_bit():
+    """Returns an independent random bit (0 or 1) for BB84 encoding."""
+    return 1 if get_quantum_random_basis() == 'X' else 0

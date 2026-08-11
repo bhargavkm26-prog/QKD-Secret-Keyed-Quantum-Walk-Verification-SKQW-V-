@@ -48,14 +48,14 @@ def start_transmitter():
             print("🚨 VERDICT: EAVESDROPPER DETECTED!")
             print("🚨 ACTION : Aborting AES Encryption. Discarding compromised key.")
             print("=======================================================\n")
-            exit()
+            sys.exit(1)
+
         else:
             print("✅ VERDICT: Channel Secure (Hoeffding Bound Satisfied).")
             print("✅ ACTION : Proceeding to AES-256 Data Encryption.")
             print("=======================================================\n")
             
-        # AES Encryption
-        aes_key = aes_encryption.generate_aes_key(final_key)
+        
             
         # AES Encryption[cite: 1]
         aes_key = aes_encryption.generate_aes_key(final_key)

@@ -75,7 +75,8 @@ def start_receiver():
             print("    to guess the secret K-parameterized coin sequence.")
             print("=======================================================\n")
             connection.send("BREACH".encode('utf-8'))
-            exit()
+            sys.exit(1)
+
         else:
             print(f"✅ [VERIFIED] TV Distance ({tv_dist:.4f}) is strictly <= Bound ({bound:.4f})")
             print("✅ MATHEMATICAL PROOF:")
@@ -92,13 +93,7 @@ def start_receiver():
         ciphertext = connection.recv(4096)
         aes_encryption.decrypt_data(aes_key, ciphertext)
             
-        # Sift keys
-        final_key = qiskit_receiver.sift_keys(tx_bases, rx_bases, measured_outcomes, round_types)
         
-        # AES Decryption
-        aes_key = aes_encryption.generate_aes_key(final_key)
-        ciphertext = connection.recv(4096)
-        aes_encryption.decrypt_data(aes_key, ciphertext)
         print("\n[Rx NODE] Session complete. Closing connection.")
 
     finally:

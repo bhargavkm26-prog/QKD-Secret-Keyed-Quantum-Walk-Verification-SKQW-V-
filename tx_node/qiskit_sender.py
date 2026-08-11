@@ -29,9 +29,10 @@ def prepare_photons(num_photons=300):
         else:
             round_types.append('D')
             
-            bit_choice = quantum_walk_rng.get_quantum_random_basis()
-            bit = 1 if bit_choice == 'X' else 0
-            basis = quantum_walk_rng.get_quantum_random_basis()
+            # Bit and basis are two INDEPENDENT random choices (correct BB84 design)
+            bit = quantum_walk_rng.get_quantum_random_bit()   # returns 0 or 1
+            basis = quantum_walk_rng.get_quantum_random_basis()  # returns 'X' or 'Z'
+
             
             tx_bits.append(bit)
             tx_bases.append(basis)

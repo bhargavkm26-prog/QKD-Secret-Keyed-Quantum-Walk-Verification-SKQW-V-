@@ -1,3 +1,4 @@
+import sys
 import subprocess
 import time
 import json
@@ -21,7 +22,7 @@ for session_id in range(1, NUM_SESSIONS + 1):
     print(f"\n[Session {session_id}/{NUM_SESSIONS}] Launching secure handshake...")
     
     # Start Bob (Receiver) in the background on port 5002
-    rx_process = subprocess.Popen(['py', '-m', 'rx_node.rx_main', '5002'])
+    rx_process = subprocess.Popen([sys.executable, '-m', 'rx_node.rx_main', '5002'])
     time.sleep(1.5)  # Allow socket to bind
     
     # Start Alice (Transmitter) in the background on port 5002
@@ -31,15 +32,19 @@ for session_id in range(1, NUM_SESSIONS + 1):
     tx_process.wait()
     rx_process.wait()
     
-    # For simulation tracking in this loop, we log a PASS verdict 
-    # (If Eve were present, rx_main exits with BREACH)
-    verdict = "PASS" 
+    # Read the ACTUAL exit code from Bob (rx_main)
+    # rx_main exits with sys.exit(1) on BREACH, sys.exit(0) on success
+    rx_exit_code = rx_process.returncode
+    verdict = "BREACH" if rx_exit_code != 0 else "PASS"
+
     transcript["sessions"].append({
         "session_id": session_id,
         "verdict": verdict,
+        "rx_exit_code": rx_exit_code,
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
     })
-    print(f"[Session {session_id}] Result Recorded -> {verdict}")
+    print(f"[Session {session_id}] Result Recorded -> {verdict} (exit code: {rx_exit_code})")
+
     time.sleep(1)
 
 # Ensure data directory exists and save transcript T_n

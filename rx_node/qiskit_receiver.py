@@ -1,3 +1,4 @@
+import random
 from qiskit import QuantumCircuit
 import qiskit.qasm2 as qasm2
 from qiskit_aer import AerSimulator
@@ -38,7 +39,11 @@ def measure_photons(qasm_payloads):
     measured_outcomes = []
     for pub_result in result:
         counts = pub_result.data.meas.get_counts() if hasattr(pub_result.data, 'meas') else pub_result.data.c.get_counts()
-        measured_outcomes.append(list(counts.keys())[0])
+        # Weighted random draw — correctly simulates one real measurement shot
+        outcomes = list(counts.keys())
+        weights = list(counts.values())
+        measured_outcomes.append(random.choices(outcomes, weights=weights, k=1)[0])
+
 
     return rx_bases, measured_outcomes
 
