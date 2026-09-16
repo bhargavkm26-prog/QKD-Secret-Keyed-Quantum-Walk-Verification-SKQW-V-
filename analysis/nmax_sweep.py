@@ -162,8 +162,8 @@ THRESHOLD       = 0.95   # Eve's win condition
 CHECK_ROUNDS    = 85     # Samples per session
 MAX_SESSIONS    = 300    # Safety cap
 LAMBDA_SCALE    = 10     # Bayesian scaling factor (unchanged)
-K_LENGTHS_TO_TEST = [3, 6, 9]
-TRIALS_PER_K    = 3
+K_LENGTHS_TO_TEST = [3,6,7,9]
+TRIALS_PER_K    = 20
 NUM_WORKERS     = 4      # Parallel threads for pre-computation
 
 # ==========================================
@@ -275,8 +275,9 @@ def run_single_nmax(k_length, dists, dist_matrix, all_states, state_idx):
         # 6. Check Eve's win condition
         if beliefs[true_k_idx] >= THRESHOLD:
             return session
+    
+    return None  # Eve never converged — caller will exclude this as outlier
 
-    return MAX_SESSIONS  # Eve never reached threshold within cap
 
 # ==========================================
 # MAIN SWEEP
@@ -306,8 +307,12 @@ if __name__ == '__main__':
         nmaxes = []
         for trial in range(TRIALS_PER_K):
             n = run_single_nmax(k_len, dists, dist_matrix, all_states, state_idx)
-            nmaxes.append(n)
-            print(f"    Trial {trial+1}: N_max = {n}")
+            if n is None:
+                print(f"    Trial {trial+1}: N_max = >300 (outlier — Eve did not converge, excluded)")
+            else:
+                nmaxes.append(n)
+                print(f"    Trial {trial+1}: N_max = {n}")
+
 
         avg_nmax = np.mean(nmaxes)
         nmax_results[k_len] = avg_nmax

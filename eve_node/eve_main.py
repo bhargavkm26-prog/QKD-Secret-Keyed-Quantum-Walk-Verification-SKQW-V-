@@ -63,21 +63,25 @@ def start_eve():
         # 5. Act as a transparent bridge for the classical verification
         # Bob sends bases -> Eve forwards to Alice
         alice_conn.send(bob_conn.recv(65536))
-        
-        # Alice sends Revelation -> Eve forwards to Bob
+
+        # Alice sends Revelation (tx_bases, round_types) -> Eve forwards to Bob
         bob_conn.send(alice_conn.recv(65536))
-        
-        # Alice sends Prediction -> Eve forwards to Bob
-        bob_conn.send(alice_conn.recv(65536))
-        
-        # Bob sends Status ("BREACH" or "SAFE") -> Eve intercepts and forwards
-        status = bob_conn.recv(1024).decode('utf-8')
-        print(f"🦹 [EVE NODE] Intercepted Bob's status report: {status}")
-        alice_conn.send(status.encode('utf-8'))
-        
-        if status != "BREACH":
+
+        # Bob sends RAW check-round outcomes -> Eve forwards to Alice
+        # K and its distribution never cross the wire — Eve only sees measurements
+        check_data = bob_conn.recv(65536)
+        print(f"🦹 [EVE NODE] Intercepted Bob's raw check-round outcomes ({len(check_data)} bytes)")
+        alice_conn.send(check_data)
+
+        # Alice sends her verdict ("SAFE" or "BREACH") -> Eve forwards to Bob
+        verdict = alice_conn.recv(1024)
+        print(f"🦹 [EVE NODE] Intercepted Alice's verdict: {verdict.decode('utf-8')}")
+        bob_conn.send(verdict)
+
+        # If safe, Alice sends AES ciphertext -> Eve forwards to Bob
+        if verdict.decode('utf-8') != "BREACH":
             bob_conn.send(alice_conn.recv(65536))
-            
+
     except Exception as e:
         print(f"🦹 [EVE NODE] Error: {e}")
     finally:

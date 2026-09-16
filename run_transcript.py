@@ -26,7 +26,7 @@ for session_id in range(1, NUM_SESSIONS + 1):
     time.sleep(1.5)  # Allow socket to bind
     
     # Start Alice (Transmitter) in the background on port 5002
-    tx_process = subprocess.Popen(['py', '-m', 'tx_node.tx_main', '5002'])
+    tx_process = subprocess.Popen([sys.executable, '-m', 'tx_node.tx_main', '5002'])
     
     # Wait for both nodes to finish execution
     tx_process.wait()
